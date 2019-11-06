@@ -1,8 +1,23 @@
 package com.eventsapp.valueobjects;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name="Users")
 public class User {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	long Id;
+	@Column(name="Name")
 	private String name;
+	@Column(name="Password")
 	private String password;
+	@Column(name="Email")
 	private String email;
 	
 	public User() {}
