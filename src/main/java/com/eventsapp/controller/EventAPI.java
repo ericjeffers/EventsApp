@@ -18,67 +18,67 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.eventsapp.persistence.UserRepository;
-import com.eventsapp.valueobjects.User;
+import com.eventsapp.persistence.EventRepository;
+import com.eventsapp.valueobjects.Event;
 
 @RestController
-@RequestMapping("/users")
-public class UserAPI {
+@RequestMapping("/events")
+public class EventAPI {
 	
 	@Autowired
-	UserRepository repo;
+	EventRepository repo;
 	
 	@GetMapping
-	public Iterable<User> getAll() {
+	public Iterable<Event> getAll() {
 		return repo.findAll();
 	}
 	
-	@GetMapping("/{userName}")
-	public Optional<User> getUserByName(@PathVariable String userName) {
-		Optional<User> optionalUser = Optional.of(repo.findByName(userName));
-		return optionalUser;
+	@GetMapping("/{eventCode}")
+	public Optional<Event> getEventByCode(@PathVariable String eventCode) {
+		Optional<Event> optionalEvent = Optional.of(repo.findByCode(eventCode));
+		return optionalEvent;
 	}
 	
 	@PostMapping
-	public ResponseEntity<?> addUser(@RequestBody User newUser, UriComponentsBuilder uri) {
-		User existingUser = repo.findByName(newUser.getName());
-		if (existingUser != null) {
+	public ResponseEntity<?> addEvent(@RequestBody Event newEvent, UriComponentsBuilder uri) {
+		Event existingEvent = repo.findByCode(newEvent.getCode());
+		if (existingEvent != null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
-		if (newUser.getName() == null || newUser.getPassword() == null || newUser.getEmail() == null) {
+		if (newEvent.getCode() == null || newEvent.getTitle() == null || newEvent.getDescription() == null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
-		newUser = repo.save(newUser);
+		newEvent = repo.save(newEvent);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-				.path("/userName").buildAndExpand(newUser.getName()).toUri();
+				.path("/eventCode").buildAndExpand(newEvent.getCode()).toUri();
 		ResponseEntity<?> response = ResponseEntity.created(location).build();
 		
 		return response;
 	}
 	
-	@PutMapping("/{userName}")
-	public ResponseEntity<?> putUser(@RequestBody User newUser, @PathVariable("userName") String userName) {
-		User user = repo.findByName(userName);
+	@PutMapping("/{eventCode}")
+	public ResponseEntity<?> putEvent(@RequestBody Event newEvent, @PathVariable("eventCode") String eventCode) {
+		Event event = repo.findByCode(eventCode);
 		
-		if (user == null || newUser.getName() == null || newUser.getPassword() == null || newUser.getEmail() == null) {
+		if (event == null || newEvent.getCode() == null || newEvent.getTitle() == null || newEvent.getDescription() == null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
-		user.setName(newUser.getName());
-		user.setPassword(newUser.getPassword());
-		user.setEmail(newUser.getEmail());
-		repo.save(user);
+		event.setCode(newEvent.getCode());
+		event.setDescription(newEvent.getDescription());
+		event.setTitle(newEvent.getTitle());
+		repo.save(event);
 
 		return ResponseEntity.ok().build();
 	}
 	
 	@Transactional
-	@DeleteMapping("/{userName}")
-	public ResponseEntity<?> deleteUser(@PathVariable("userName") String userName) {
-		long usersDeleted = repo.deleteByName(userName);
-		if (usersDeleted == 0) {
+	@DeleteMapping("/{eventCode}")
+	public ResponseEntity<?> deleteUser(@PathVariable("eventCode") String eventCode) {
+		long eventsDeleted = repo.deleteByCode(eventCode);
+		if (eventsDeleted == 0) {
 			return ResponseEntity.badRequest().build();
 		}
 		//assertThat(usersDeleted).isEqualTo(1);

@@ -18,41 +18,40 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.eventsapp.persistence.UserRepository;
-import com.eventsapp.valueobjects.User;
+import com.eventsapp.persistence.RegistrationRepository;
+import com.eventsapp.valueobjects.Registration;
 
 @RestController
-@RequestMapping("/users")
-public class UserAPI {
+@RequestMapping("/registrations")
+public class RegistrationAPI {
 	
 	@Autowired
-	UserRepository repo;
+	RegistrationRepository repo;
 	
 	@GetMapping
-	public Iterable<User> getAll() {
+	public Iterable<Registration> getAll() {
 		return repo.findAll();
 	}
 	
-	@GetMapping("/{userName}")
-	public Optional<User> getUserByName(@PathVariable String userName) {
-		Optional<User> optionalUser = Optional.of(repo.findByName(userName));
-		return optionalUser;
+	@GetMapping("/{eventId}/{userId}")
+	public Registration getRegistrationById(@PathVariable long eventId, @PathVariable long userId) {
+		Registration[] registrations = repo.findByEventId(eventId);
+		System.out.println(registrations[0]);
+		System.out.println(registrations[1]);
+		System.out.println(registrations[2]);
+		return registrations[0];
 	}
-	
+	/*
 	@PostMapping
-	public ResponseEntity<?> addUser(@RequestBody User newUser, UriComponentsBuilder uri) {
-		User existingUser = repo.findByName(newUser.getName());
-		if (existingUser != null) {
+	public ResponseEntity<?> addRegistration(@RequestBody Registration newRegistration, UriComponentsBuilder uri) {		
+		if (newRegistration.getEventId() == 0 || newRegistration.getEventId() == 0 
+				|| newRegistration.getDate() == null || newRegistration.getNotes() == null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
-		if (newUser.getName() == null || newUser.getPassword() == null || newUser.getEmail() == null) {
-			return ResponseEntity.badRequest().build();
-		}
-		
-		newUser = repo.save(newUser);
+		newRegistration = repo.save(newRegistration);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-				.path("/userName").buildAndExpand(newUser.getName()).toUri();
+				.path("/eventId").buildAndExpand(newRegistration.getEventId()).toUri();
 		ResponseEntity<?> response = ResponseEntity.created(location).build();
 		
 		return response;
@@ -84,5 +83,5 @@ public class UserAPI {
 		//assertThat(usersDeleted).isEqualTo(1);
 		
 		return ResponseEntity.ok().build();	
-	}
+	}*/
 }
