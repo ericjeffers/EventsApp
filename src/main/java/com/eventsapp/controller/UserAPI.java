@@ -3,6 +3,8 @@ package com.eventsapp.controller;
 import java.net.URI;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,19 +55,28 @@ public class UserAPI {
 	
 	@PutMapping("/{userName}")
 	public ResponseEntity<?> putUser(@RequestBody User newUser, @PathVariable("userName") String userName) {
-		if (!newUser.getName().equals(userName) || newUser.getPassword() == null || newUser.getEmail() == null) {
+		User user = repo.findByName(userName);
+		
+		if (user == null || newUser.getName() == null || newUser.getPassword() == null || newUser.getEmail() == null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
-		newUser = repo.save(newUser);
+		user.setName(newUser.getName());
+		user.setPassword(newUser.getPassword());
+		user.setEmail(newUser.getEmail());
+		repo.save(user);
+
 		return ResponseEntity.ok().build();
 	}
 	
-	@DeleteMapping("/userName")
+	@Transactional
+	@DeleteMapping("/{userName}")
 	public ResponseEntity<?> deleteUser(@PathVariable("userName") String userName) {
-		if (!repo.deleteByName(userName)) {
+		long usersDeleted = repo.deleteByName(userName);
+		if (usersDeleted == 0) {
 			return ResponseEntity.badRequest().build();
 		}
+		//assertThat(usersDeleted).isEqualTo(1);
 		
 		return ResponseEntity.ok().build();	
 	}
