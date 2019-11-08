@@ -33,55 +33,70 @@ public class RegistrationAPI {
 		return repo.findAll();
 	}
 	
-	@GetMapping("/{eventId}/{userId}")
-	public Registration getRegistrationById(@PathVariable long eventId, @PathVariable long userId) {
-		Registration[] registrations = repo.findByEventId(eventId);
-		System.out.println(registrations[0]);
-		System.out.println(registrations[1]);
-		System.out.println(registrations[2]);
-		return registrations[0];
+	@GetMapping("/{eventId}/{customerId}")
+	public Optional<Registration> getRegistrationById(@PathVariable long eventId, @PathVariable long customerId) {
+		Optional<Registration> registration = Optional.of(repo.findByEventIdAndCustomerId(eventId, customerId));
+		return registration;
 	}
-	/*
+	
 	@PostMapping
-	public ResponseEntity<?> addRegistration(@RequestBody Registration newRegistration, UriComponentsBuilder uri) {		
-		if (newRegistration.getEventId() == 0 || newRegistration.getEventId() == 0 
+	public ResponseEntity<?> addRegistration(@RequestBody Registration newRegistration, UriComponentsBuilder uri) {	
+		Registration existingRegistration = repo.findByEventIdAndCustomerId(newRegistration.getEventId(), newRegistration.getCustomerId());
+		
+		// Can't add a new registration if one already exists with this event ID and customer ID
+		if (existingRegistration != null) {
+			return ResponseEntity.badRequest().build();
+		}
+		
+		// If any of the new registration fields are blank, don't create a new registration
+		if (newRegistration.getEventId() == 0 || newRegistration.getCustomerId() == 0 
 				|| newRegistration.getDate() == null || newRegistration.getNotes() == null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
 		newRegistration = repo.save(newRegistration);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-				.path("/eventId").buildAndExpand(newRegistration.getEventId()).toUri();
+				.path("/eventId/userId").buildAndExpand(newRegistration.getEventId(), newRegistration.getCustomerId()).toUri();
 		ResponseEntity<?> response = ResponseEntity.created(location).build();
 		
 		return response;
 	}
 	
-	@PutMapping("/{userName}")
-	public ResponseEntity<?> putUser(@RequestBody User newUser, @PathVariable("userName") String userName) {
-		User user = repo.findByName(userName);
+	@PutMapping("/{eventId}/{customerId}")
+	public ResponseEntity<?> putRegistration(@RequestBody Registration newRegistration, 
+			@PathVariable("eventId") long eventId, @PathVariable("customerId") long customerId) {
+		Registration registration = repo.findByEventIdAndCustomerId(eventId, customerId);
 		
-		if (user == null || newUser.getName() == null || newUser.getPassword() == null || newUser.getEmail() == null) {
+		// If the registration doesn't exist, we can't update its info
+		if (registration == null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
-		user.setName(newUser.getName());
-		user.setPassword(newUser.getPassword());
-		user.setEmail(newUser.getEmail());
-		repo.save(user);
+		// If any of the updated registration fields are blank, don't update the registration
+		if (newRegistration.getEventId() == 0 || newRegistration.getCustomerId() == 0 
+				|| newRegistration.getDate() == null || newRegistration.getNotes() == null) {
+			
+		}
+		
+		registration.setEventId(newRegistration.getEventId());
+		registration.setCustomerId(newRegistration.getCustomerId());
+		registration.setDate(newRegistration.getDate());
+		registration.setNotes(newRegistration.getNotes());
+		repo.save(registration);
 
 		return ResponseEntity.ok().build();
 	}
 	
 	@Transactional
-	@DeleteMapping("/{userName}")
-	public ResponseEntity<?> deleteUser(@PathVariable("userName") String userName) {
-		long usersDeleted = repo.deleteByName(userName);
-		if (usersDeleted == 0) {
+	@DeleteMapping("/{eventId}/{customerId}")
+	public ResponseEntity<?> deleteRegistration(@PathVariable("eventId") long eventId, @PathVariable("customerId") long customerId) {
+		long registrationsDeleted = repo.deleteByEventIdAndCustomerId(eventId, customerId);
+		
+		// if we didn't delete a registration, return a bad request
+		if (registrationsDeleted == 0) {
 			return ResponseEntity.badRequest().build();
 		}
-		//assertThat(usersDeleted).isEqualTo(1);
 		
 		return ResponseEntity.ok().build();	
-	}*/
+	}
 }

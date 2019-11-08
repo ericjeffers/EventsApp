@@ -42,10 +42,13 @@ public class EventAPI {
 	@PostMapping
 	public ResponseEntity<?> addEvent(@RequestBody Event newEvent, UriComponentsBuilder uri) {
 		Event existingEvent = repo.findByCode(newEvent.getCode());
+		
+		// Can't add a new event if one already exists with this code
 		if (existingEvent != null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
+		// If any of the new event fields are blank, don't create a new event
 		if (newEvent.getCode() == null || newEvent.getTitle() == null || newEvent.getDescription() == null) {
 			return ResponseEntity.badRequest().build();
 		}
@@ -62,7 +65,13 @@ public class EventAPI {
 	public ResponseEntity<?> putEvent(@RequestBody Event newEvent, @PathVariable("eventCode") String eventCode) {
 		Event event = repo.findByCode(eventCode);
 		
-		if (event == null || newEvent.getCode() == null || newEvent.getTitle() == null || newEvent.getDescription() == null) {
+		// If the event doesn't exist, we can't update its info
+		if (event == null) {
+			return ResponseEntity.badRequest().build();
+		}
+		
+		// If any of the updated event fields are blank, don't update the event
+		if (newEvent.getCode() == null || newEvent.getTitle() == null || newEvent.getDescription() == null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
@@ -78,10 +87,11 @@ public class EventAPI {
 	@DeleteMapping("/{eventCode}")
 	public ResponseEntity<?> deleteUser(@PathVariable("eventCode") String eventCode) {
 		long eventsDeleted = repo.deleteByCode(eventCode);
+		
+		// if we didn't delete an event, return a bad request
 		if (eventsDeleted == 0) {
 			return ResponseEntity.badRequest().build();
 		}
-		//assertThat(usersDeleted).isEqualTo(1);
 		
 		return ResponseEntity.ok().build();	
 	}
