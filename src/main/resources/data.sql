@@ -1,6 +1,6 @@
-insert into CUSTOMERS (CUSTOMER_NAME, PASSWORD, EMAIL) VALUES ('Bruce', 'pass', 'bruce@a.com');
-insert into CUSTOMERS (CUSTOMER_NAME, PASSWORD, EMAIL) VALUES ('Paul', 'pass', 'paul@b.com');
-insert into CUSTOMERS (CUSTOMER_NAME, PASSWORD, EMAIL) VALUES ('Rick', 'pass', 'rick@c.com');
+insert into CUSTOMERS (CUSTOMER_NAME, PASSWORD, EMAIL) VALUES ('Bruce', 'brucepass', 'bruce@a.com');
+insert into CUSTOMERS (CUSTOMER_NAME, PASSWORD, EMAIL) VALUES ('Paul', 'paulpass', 'paul@b.com');
+insert into CUSTOMERS (CUSTOMER_NAME, PASSWORD, EMAIL) VALUES ('Rick', 'rickpass', 'rick@c.com');
 
 insert into EVENTS (EVENT_CODE, TITLE, DESCRIPTION ) VALUES ('CNF001', 'All-Java Conference', 'Lectures and exhibits covering all Java topics' );
 insert into EVENTS (EVENT_CODE, TITLE, DESCRIPTION ) VALUES ('WKS002', 'Spring Boot Workshop', 'Hands-on Spring Boot Workshop' );
