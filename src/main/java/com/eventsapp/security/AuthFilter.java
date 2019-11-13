@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthFilter implements Filter {
 
-	// JWTUtil jwtUtil = new JWTMockUtil();
-	 JWTUtil jwtUtil = new JWTHelper();
+	 JWTHelper jwtHelper = new JWTHelper();
 	
-	private String api_scope = "com.api.customer.r";
+	//private String api_scope = "com.api.customer.r";
+	private String api_scope = "com.webage.auth.apis";
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -27,6 +27,7 @@ public class AuthFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 		String uri = req.getRequestURI();
+		
 		if (uri.startsWith("/token")) {
 			// continue on to get-token endpoint
 			chain.doFilter(request, response);
@@ -35,9 +36,10 @@ public class AuthFilter implements Filter {
 			// check JWT token
 			String authheader = req.getHeader("authorization");
 			if (authheader != null && authheader.length() > 7 && authheader.startsWith("Bearer")) {
+				System.out.println("auth header: " + authheader);
 				String jwt_token = authheader.substring(7, authheader.length());
-				if (jwtUtil.verifyToken(jwt_token)) {
-					String request_scopes = jwtUtil.getScopes(jwt_token);
+				if (jwtHelper.verifyToken(jwt_token)) {
+					String request_scopes = jwtHelper.getScopes(jwt_token);
 					if (request_scopes.contains(api_scope)) {
 						// continue on to api
 						chain.doFilter(request, response);

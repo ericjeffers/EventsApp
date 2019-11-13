@@ -12,11 +12,9 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.eventsapp.valueobjects.Token;
 
-public class JWTHelper implements JWTUtil {
+public class JWTHelper {
 	
-		@Override
-		public Token createToken(String scopes) {
-			
+		public Token createToken(String scopes) {	
 			try {
 			    Algorithm algorithm = Algorithm.HMAC256("secret");
 			    long fiveHoursInMillis = 1000 * 60 * 60 * 5;
@@ -33,9 +31,7 @@ public class JWTHelper implements JWTUtil {
 			}	
 		}
 
-		@Override
-		public boolean verifyToken(String token) {
-
+		public boolean verifyToken(String token) {		
 			try {
 			    Algorithm algorithm = Algorithm.HMAC256("secret");
 			    JWTVerifier verifier = JWT.require(algorithm)
@@ -44,6 +40,7 @@ public class JWTHelper implements JWTUtil {
 			    DecodedJWT jwt = verifier.verify(token);
 			    return true;
 			} catch (JWTVerificationException exception){
+				System.out.println("exception: " + exception);
 				return false;
 			}		
 			
@@ -62,7 +59,6 @@ public class JWTHelper implements JWTUtil {
 			}
 		}
 		
-		@Override
 		public String getScopes(String token) {
 			try {
 			    Algorithm algorithm = Algorithm.HMAC256("secret");

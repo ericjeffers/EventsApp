@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.eventsapp.persistence.CustomerRepository;
+import com.eventsapp.security.Authenticator;
 import com.eventsapp.security.JWTHelper;
-import com.eventsapp.security.JWTUtil;
 import com.eventsapp.valueobjects.Customer;
 import com.eventsapp.valueobjects.Token;
 import com.eventsapp.valueobjects.TokenRequestData;
@@ -24,7 +24,7 @@ public class TokenAPI {
 	@Autowired
 	CustomerRepository repo;
 	
-	JWTUtil jwtUtil = new JWTHelper();
+	JWTHelper jwtHelper = new JWTHelper();
 	
 	@PostMapping(consumes = "application/json")
 	public ResponseEntity<?> getToken(@RequestBody TokenRequestData tokenRequestData) {
@@ -38,7 +38,7 @@ public class TokenAPI {
 		if (username != null && username.length() > 0 
 				&& password != null && password.length() > 0 
 				&& Authenticator.checkPassword(username, password, customerStream)) {
-			Token token = jwtUtil.createToken(scopes);
+			Token token = jwtHelper.createToken(scopes);
 			ResponseEntity<?> response = ResponseEntity.ok(token);
 			return response;			
 		}

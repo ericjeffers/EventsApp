@@ -28,6 +28,12 @@ public class Customer {
 		this.email = email;
 	}
 	
+	public long getId() {
+		return Id;
+	}
+	public void setId(long id) {
+		this.Id = id;
+	}
 	public String getName() {
 		return name;
 	}

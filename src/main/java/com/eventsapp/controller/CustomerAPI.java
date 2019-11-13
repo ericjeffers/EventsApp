@@ -1,7 +1,11 @@
 package com.eventsapp.controller;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.transaction.Transactional;
 
@@ -57,6 +61,28 @@ public class CustomerAPI {
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("/customerName").buildAndExpand(newCustomer.getName()).toUri();
 		ResponseEntity<?> response = ResponseEntity.created(location).build();
+		
+		return response;
+	}
+	
+	//lookupCustomerByName GET
+	@GetMapping("/byname/{username}")
+	public ResponseEntity<?> lookupCustomerByNameGet(@PathVariable("username") String username,
+			UriComponentsBuilder uri) {
+		//  Workshop:  Write an implemenatation to look up a customer by name.  Think about what
+		//  your response should be if no customer matches the name the caller is searching for.
+		//  With the data model implemented in CustomersRepository, do you need to handle more than
+		//  one match per request?
+		
+		Stream<Customer> customerStream = StreamSupport.stream(repo.findAll().spliterator(), false);
+		List<Customer> selectedCustomer = customerStream.filter(x->x.getName().contains(username)).collect(Collectors.toList());
+		
+		if (selectedCustomer.size() != 1) {
+			return ResponseEntity.badRequest().build();
+		}
+		
+		Customer customer = selectedCustomer.get(0);	
+		ResponseEntity<?> response = ResponseEntity.ok(customer);
 		
 		return response;
 	}

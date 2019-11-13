@@ -1,4 +1,4 @@
-package com.eventsapp.controller;
+package com.eventsapp.security;
 
 import java.util.List;
 import java.util.stream.Collectors;

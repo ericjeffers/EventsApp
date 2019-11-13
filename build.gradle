@@ -13,13 +13,29 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.hsqldb:hsqldb'
+	//implementation 'org.springframework.boot:spring-boot-starter-web'
+	//implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	//implementation 'org.hsqldb:hsqldb'
 	compile group: 'com.auth0', name: 'java-jwt', version: '3.8.1'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
+	//testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		//exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+		
+	compile group: 'org.springframework.boot', name: 'spring-boot-gradle-plugin', version:'1.4.2.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:'1.4.2.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version:'1.4.2.RELEASE'
+    compile group: 'org.hsqldb', name: 'hsqldb', version:'2.3.3'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version:'1.4.2.RELEASE'
+    compile group: 'com.sun.xml.bind', name: 'jaxb-core', version:'2.3.0.1'
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version:'2.3.1'
+    compile group: 'com.sun.xml.bind', name: 'jaxb-impl', version:'2.3.1'
+    compile group: 'javax.activation', name: 'activation', version:'1.1.1'
+    compile group: 'io.jsonwebtoken', name: 'jjwt-api', version:'0.10.5'
+    compile group: 'org.json', name: 'json', version:'20180813'
+	compile 'io.micrometer:micrometer-registry-prometheus:latest.release'
+    runtime group: 'io.jsonwebtoken', name: 'jjwt-impl', version:'0.10.5'
+    runtime group: 'io.jsonwebtoken', name: 'jjwt-jackson', version:'0.10.5'
+    runtime group: 'org.bouncycastle', name: 'bcprov-jdk15on', version:'1.60'
+	//}
 }
 
 test {
