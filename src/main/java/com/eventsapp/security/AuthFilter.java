@@ -18,7 +18,8 @@ public class AuthFilter implements Filter {
 	 JWTHelper jwtHelper = new JWTHelper();
 	
 	//private String api_scope = "com.api.customer.r";
-	private String api_scope = "com.webage.auth.apis";
+	private String auth_api_scope = "com.webage.auth.apis";
+	private String data_api_scope = "com.webage.data.apis";
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -40,7 +41,8 @@ public class AuthFilter implements Filter {
 				String jwt_token = authheader.substring(7, authheader.length());
 				if (jwtHelper.verifyToken(jwt_token)) {
 					String request_scopes = jwtHelper.getScopes(jwt_token);
-					if (request_scopes.contains(api_scope)) {
+					System.out.println(request_scopes);
+					if (request_scopes.contains(auth_api_scope) || request_scopes.contains(data_api_scope)) {
 						// continue on to api
 						chain.doFilter(request, response);
 						return;

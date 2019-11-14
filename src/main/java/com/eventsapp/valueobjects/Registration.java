@@ -1,6 +1,6 @@
 package com.eventsapp.valueobjects;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,19 +20,25 @@ public class Registration {
 	@Column(name="CUSTOMER_ID")
 	private long customerId;
 	@Column(name="REGISTRATION_DATE")
-	private LocalDateTime date;
+	private Date date;
 	@Column(name="NOTES")
 	private String notes;
 	
 	public Registration() {}
 	
-	public Registration(long eventId, long customerId, LocalDateTime date, String notes) {
+	public Registration(long eventId, long customerId, Date date, String notes) {
 		this.eventId = eventId;
 		this.customerId = customerId;
 		this.date = date;
 		this.notes = notes;
 	}
 	
+	public long getId() {
+		return Id;
+	}
+	public void setId(long id) {
+		this.Id = id;
+	}
 	public long getEventId() {
 		return eventId;
 	}
@@ -45,10 +51,10 @@ public class Registration {
 	public void setCustomerId(long customerId) {
 		this.customerId = customerId;
 	}
-	public LocalDateTime getDate() {
+	public Date getDate() {
 		return date;
 	}
-	public void setDate(LocalDateTime date) {
+	public void setDate(Date date) {
 		this.date = date;
 	}
 	public String getNotes() {

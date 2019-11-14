@@ -3,8 +3,6 @@ package com.eventsapp.controller;
 import java.net.URI;
 import java.util.Optional;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,9 +31,16 @@ public class RegistrationAPI {
 		return repo.findAll();
 	}
 	
-	@GetMapping("/{eventId}/{customerId}")
+	// search for registration by both event ID and customer ID
+/*	@GetMapping("/{eventId}/{customerId}")
 	public Optional<Registration> getRegistrationById(@PathVariable long eventId, @PathVariable long customerId) {
 		Optional<Registration> registration = Optional.of(repo.findByEventIdAndCustomerId(eventId, customerId));
+		return registration;
+	}*/
+	
+	@GetMapping("/{registrationId}")
+	public Optional<Registration> getRegistrationById(@PathVariable("registrationId") long id) {
+		Optional<Registration> registration = repo.findById(id);
 		return registration;
 	}
 	
@@ -62,7 +67,7 @@ public class RegistrationAPI {
 		return response;
 	}
 	
-	@PutMapping("/{eventId}/{customerId}")
+/*	@PutMapping("/{eventId}/{customerId}")
 	public ResponseEntity<?> putRegistration(@RequestBody Registration newRegistration, 
 			@PathVariable("eventId") long eventId, @PathVariable("customerId") long customerId) {
 		Registration registration = repo.findByEventIdAndCustomerId(eventId, customerId);
@@ -85,8 +90,40 @@ public class RegistrationAPI {
 		repo.save(registration);
 
 		return ResponseEntity.ok().build();
-	}
+	}*/
 	
+	@PutMapping("/{eventId}")
+	public ResponseEntity<?> putRegistration(
+			@RequestBody Registration newRegistration,
+			@PathVariable("eventId") long eventId) 
+	{
+		// Make sure we aren't changing the event ID to an existing one
+		Registration[] newRegistrations = repo.findByEventId(newRegistration.getEventId());
+		if (newRegistrations.length != 0 && newRegistration.getEventId() != eventId) {
+			return ResponseEntity.badRequest().build();
+		}
+	
+		Registration[] registrations = repo.findByEventId(eventId);
+		for (int i = 0; i < registrations.length; i++) {
+			// Only set fields that have been changed
+			if (newRegistration.getEventId() != 0) {
+				registrations[i].setEventId(newRegistration.getEventId());
+			}
+			if (newRegistration.getDate() != null) {
+				registrations[i].setDate(newRegistration.getDate());
+			}
+			if (newRegistration.getNotes() != null) {
+				registrations[i].setNotes(newRegistration.getNotes());
+			}
+			
+			repo.save(registrations[i]);
+		}
+		
+		return ResponseEntity.ok().build();
+	}
+
+	// Delete single registration by event ID and customer ID
+	/*
 	@Transactional
 	@DeleteMapping("/{eventId}/{customerId}")
 	public ResponseEntity<?> deleteRegistration(@PathVariable("eventId") long eventId, @PathVariable("customerId") long customerId) {
@@ -98,5 +135,21 @@ public class RegistrationAPI {
 		}
 		
 		return ResponseEntity.ok().build();	
-	}
+	}	*/
+	
+	@DeleteMapping("/{eventId}")
+	public ResponseEntity<?> deleteRegistrationById(@PathVariable("eventId") long eventId) {
+		
+		Registration[] registrations = repo.findByEventId(eventId);
+		
+		if (registrations.length == 0) {
+			return ResponseEntity.badRequest().build();
+		}
+		
+		for (int i = 0; i < registrations.length; i++) {
+			repo.deleteById(registrations[i].getId());
+		}
+		
+		return ResponseEntity.ok().build();
+	}	
 }
