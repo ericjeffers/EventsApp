@@ -59,11 +59,11 @@ public class RegistrationAPI {
 		Optional<Registration> regOptional= repo.findById(id);
 		
 		if (!regOptional.isPresent()) {
-			return null;
+			Optional<RegistrationMedium> regMedOptional = Optional.ofNullable(null);
+			return regMedOptional;
 		}
 		
 		Registration registration = regOptional.get();
-
 		
 		RegistrationMedium regMed = Registration.convertRegistrationToMedium(registration);
 		Optional<RegistrationMedium> regMedOptional = Optional.of(regMed);
@@ -77,13 +77,14 @@ public class RegistrationAPI {
 		
 		// Can't add a new registration if one already exists with this event ID and customer ID
 		if (existingRegistration != null) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().body("Event registration already exists for this customer.");
 		}
 		
 		// If any of the new registration fields are blank, don't create a new registration
 		if (newRegistration.getEventId() == 0 || newRegistration.getCustomerId() == 0 
-				|| newRegistration.getRegistrationDate() == null || newRegistration.getNotes() == null) {
-			return ResponseEntity.badRequest().build();
+				|| newRegistration.getRegistrationDate() == null || newRegistration.getNotes() == null
+				|| newRegistration.getNotes().equals("")) {
+			return ResponseEntity.badRequest().body("Fields cannot be empty.");
 		}
 		
 		newRegistration = repo.save(newRegistration);
@@ -129,7 +130,7 @@ public class RegistrationAPI {
 		// Make sure we aren't changing the event ID to an existing one
 		Registration[] newRegistrations = repo.findByEventId(newRegistration.getEventId());
 		if (newRegistrations.length != 0 && newRegistration.getEventId() != eventId) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().body("This event already exists.");
 		}
 	
 		Registration[] registrations = repo.findByEventId(eventId);
@@ -141,7 +142,7 @@ public class RegistrationAPI {
 			if (newRegistration.getRegistrationDate() != null) {
 				registrations[i].setRegistrationDate(newRegistration.getRegistrationDate());
 			}
-			if (newRegistration.getNotes() != null) {
+			if (newRegistration.getNotes() != null && !newRegistration.getNotes().equals("")) {
 				registrations[i].setNotes(newRegistration.getNotes());
 			}
 			
@@ -172,7 +173,7 @@ public class RegistrationAPI {
 		Registration[] registrations = repo.findByEventId(eventId);
 		
 		if (registrations.length == 0) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().body("Registration does not exist.");
 		}
 		
 		for (int i = 0; i < registrations.length; i++) {

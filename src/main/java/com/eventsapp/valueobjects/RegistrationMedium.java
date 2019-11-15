@@ -2,8 +2,6 @@ package com.eventsapp.valueobjects;
 
 import java.sql.Date;
 
-import org.json.JSONObject;
-
 public class RegistrationMedium {
 	
 	long id;

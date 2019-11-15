@@ -39,7 +39,7 @@ public class CustomerAPI {
 	
 	@GetMapping("/{customerName}")
 	public Optional<Customer> getCustomerByName(@PathVariable String customerName) {
-		Optional<Customer> optionalCustomer = Optional.of(repo.findByName(customerName));
+		Optional<Customer> optionalCustomer = Optional.ofNullable(repo.findByName(customerName));
 		return optionalCustomer;
 	}
 	
@@ -49,12 +49,13 @@ public class CustomerAPI {
 		
 		// Can't add a new customer if one already exists with this name
 		if (existingCustomer != null) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().body("Customer name already exists.");
 		}
 		
 		// If any of the new customer fields are blank, don't create a new customer
-		if (newCustomer.getName() == null || newCustomer.getPassword() == null || newCustomer.getEmail() == null) {
-			return ResponseEntity.badRequest().build();
+		if (newCustomer.getName() == null || newCustomer.getPassword() == null || newCustomer.getEmail() == null
+				|| newCustomer.getName().equals("") || newCustomer.getPassword().equals("") || newCustomer.getEmail().equals("")) {
+			return ResponseEntity.badRequest().body("Fields cannot be empty.");
 		}
 		
 		newCustomer = repo.save(newCustomer);
@@ -78,7 +79,7 @@ public class CustomerAPI {
 		List<Customer> selectedCustomer = customerStream.filter(x->x.getName().contains(username)).collect(Collectors.toList());
 		
 		if (selectedCustomer.size() != 1) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().body("User does not exist.");
 		}
 		
 		Customer customer = selectedCustomer.get(0);	
@@ -93,15 +94,15 @@ public class CustomerAPI {
 		
 		// If the customer doesn't exist, we can't update their info
 		if (customer == null) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().body("User does not exist.");
 		}
 		
 		// If any of the updated customer fields are blank, don't update the customer
-		if (newCustomer.getName() == null || newCustomer.getPassword() == null || newCustomer.getEmail() == null) {
-			return ResponseEntity.badRequest().build();
+		if (newCustomer.getPassword() == null || newCustomer.getEmail() == null
+				|| newCustomer.getPassword().equals("") || newCustomer.getEmail().equals("")) {
+			return ResponseEntity.badRequest().body("Fields cannot be empty.");
 		}
 		
-		customer.setName(newCustomer.getName());
 		customer.setPassword(newCustomer.getPassword());
 		customer.setEmail(newCustomer.getEmail());
 		repo.save(customer);
@@ -116,7 +117,7 @@ public class CustomerAPI {
 		
 		// if we didn't delete a user, return a bad request
 		if (customersDeleted == 0) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().body("User does not exist.");
 		}
 		
 		return ResponseEntity.ok().build();	
