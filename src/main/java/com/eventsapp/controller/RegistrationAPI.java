@@ -1,7 +1,13 @@
 package com.eventsapp.controller;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +24,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.eventsapp.persistence.RegistrationRepository;
 import com.eventsapp.valueobjects.Registration;
+import com.eventsapp.valueobjects.RegistrationMedium;
 
 @RestController
 @RequestMapping("/registrations")
@@ -27,8 +34,17 @@ public class RegistrationAPI {
 	RegistrationRepository repo;
 	
 	@GetMapping
-	public Iterable<Registration> getAll() {
-		return repo.findAll();
+	public Iterable<RegistrationMedium> getAll() {
+		Iterable<Registration> regs = repo.findAll();
+		
+		Registration[] regArray = StreamSupport.stream(regs.spliterator(), false).toArray(Registration[]::new);
+		RegistrationMedium[] regMedArray = new RegistrationMedium[regArray.length];
+		for (int i = 0; i < regArray.length; i++) {
+			regMedArray[i] = Registration.convertRegistrationToMedium(regArray[i]);
+		}
+		
+		Iterable<RegistrationMedium> regMedIterable = Arrays.asList(regMedArray);
+		return regMedIterable;
 	}
 	
 	// search for registration by both event ID and customer ID
@@ -39,13 +55,24 @@ public class RegistrationAPI {
 	}*/
 	
 	@GetMapping("/{registrationId}")
-	public Optional<Registration> getRegistrationById(@PathVariable("registrationId") long id) {
-		Optional<Registration> registration = repo.findById(id);
-		return registration;
+	public Optional<RegistrationMedium> getRegistrationById(@PathVariable("registrationId") long id) {
+		Optional<Registration> regOptional= repo.findById(id);
+		
+		if (!regOptional.isPresent()) {
+			return null;
+		}
+		
+		Registration registration = regOptional.get();
+
+		
+		RegistrationMedium regMed = Registration.convertRegistrationToMedium(registration);
+		Optional<RegistrationMedium> regMedOptional = Optional.of(regMed);
+		return regMedOptional;
 	}
 	
 	@PostMapping
-	public ResponseEntity<?> addRegistration(@RequestBody Registration newRegistration, UriComponentsBuilder uri) {	
+	public ResponseEntity<?> addRegistration(@RequestBody RegistrationMedium newRegistrationMedium, UriComponentsBuilder uri) {	
+		Registration newRegistration = RegistrationMedium.convertMediumToRegistration(newRegistrationMedium);
 		Registration existingRegistration = repo.findByEventIdAndCustomerId(newRegistration.getEventId(), newRegistration.getCustomerId());
 		
 		// Can't add a new registration if one already exists with this event ID and customer ID
@@ -55,7 +82,7 @@ public class RegistrationAPI {
 		
 		// If any of the new registration fields are blank, don't create a new registration
 		if (newRegistration.getEventId() == 0 || newRegistration.getCustomerId() == 0 
-				|| newRegistration.getDate() == null || newRegistration.getNotes() == null) {
+				|| newRegistration.getRegistrationDate() == null || newRegistration.getNotes() == null) {
 			return ResponseEntity.badRequest().build();
 		}
 		
@@ -94,9 +121,11 @@ public class RegistrationAPI {
 	
 	@PutMapping("/{eventId}")
 	public ResponseEntity<?> putRegistration(
-			@RequestBody Registration newRegistration,
+			@RequestBody RegistrationMedium newRegistrationMedium,
 			@PathVariable("eventId") long eventId) 
 	{
+		Registration newRegistration = RegistrationMedium.convertMediumToRegistration(newRegistrationMedium);
+		
 		// Make sure we aren't changing the event ID to an existing one
 		Registration[] newRegistrations = repo.findByEventId(newRegistration.getEventId());
 		if (newRegistrations.length != 0 && newRegistration.getEventId() != eventId) {
@@ -109,8 +138,8 @@ public class RegistrationAPI {
 			if (newRegistration.getEventId() != 0) {
 				registrations[i].setEventId(newRegistration.getEventId());
 			}
-			if (newRegistration.getDate() != null) {
-				registrations[i].setDate(newRegistration.getDate());
+			if (newRegistration.getRegistrationDate() != null) {
+				registrations[i].setRegistrationDate(newRegistration.getRegistrationDate());
 			}
 			if (newRegistration.getNotes() != null) {
 				registrations[i].setNotes(newRegistration.getNotes());
